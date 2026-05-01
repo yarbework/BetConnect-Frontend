@@ -4,7 +4,7 @@ import { Trash2, Edit3, MapPin, Sparkles, Bed, Bath, Maximize } from 'lucide-rea
 export default function AgentPropertyCard({ property, onDelete }) {
   
   const backendBase = import.meta.env.PROD 
-    ? import.meta.env.VITE_API_URL 
+    ? import.meta.env.VITE_IMAGE_API_URL 
     : "http://localhost:5000";
 
   const imageUrl = property.images?.[0]?.startsWith('http') 
