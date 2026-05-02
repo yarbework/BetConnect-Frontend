@@ -20,7 +20,7 @@ export default function PropertyCard({ property, isBookmarked, onBookmarkToggle 
     if (path.startsWith('http')) return path;
     
     const normalized = path.replace(/\\/g, '/');
-    const base = import.meta.env.PROD ? import.meta.env.VITE_IMAGE_BASE_URL : "http://localhost:5000";
+    const base = import.meta.env.PROD ? import.meta.env.VITE_IMAGE_API_URL : "http://localhost:5000";
     return `${base}/${normalized}`;
   };
 
