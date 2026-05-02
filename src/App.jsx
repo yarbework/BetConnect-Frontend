@@ -17,7 +17,7 @@ import AgentDashboard from './pages/AgentDashboard';
 import UserDashboard from './pages/UserDashboard';
 import SavedHomesPage from './pages/SavedHomesPage';
 import AgentPayment from './pages/AgentPayment';
-import AIChatPage from './pages/AIChatPage';
+import AiChatPage from './pages/AiChatPage';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
 
 import ReportListing from './components/layout/ReportListing';
@@ -43,7 +43,7 @@ function App() {
           <Route element={<DashboardLayout />}>
             
             {/* AI Chat accessible to logged-in users */}
-            <Route path="/ai-chat" element={<AIChatPage />} />
+            <Route path="/ai-chat" element={<AiChatPage />} />
 
             {/* ADMIN ROUTES */}
             <Route element={<RoleGate allowedRoles={['admin']} />}>

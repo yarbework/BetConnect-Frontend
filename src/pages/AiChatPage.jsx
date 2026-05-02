@@ -51,7 +51,7 @@ const MessageBubble = ({ message }) => {
   );
 };
 
-const AIChatPage = () => {
+const AiChatPage = () => {
   const [messages, setMessages] = useState([{
     id: 1,
     sender: 'ai',
@@ -176,4 +176,4 @@ const AIChatPage = () => {
     </div>
   );
 };
-export default AIChatPage;
+export default AiChatPage;
