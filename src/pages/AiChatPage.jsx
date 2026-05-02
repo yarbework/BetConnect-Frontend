@@ -87,14 +87,13 @@ const AIChatPage = () => {
     setIsTyping(true);
 
     try {
-      // 1. Hit the AI route we discussed (returns { response, properties })
       const res = await API.post('/ai/chat', { message: currentInput });
       
       const aiMsg = {
         id: Date.now() + 1,
         sender: 'ai',
         text: res.data.response, 
-        properties: res.data.properties || [], // Store real DB objects here
+        properties: res.data.properties || [], 
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       
