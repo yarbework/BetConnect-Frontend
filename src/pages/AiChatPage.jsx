@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, Loader2, Search } from 'lucide-react';
 import API from '../services/api';
-import PropertyCard from '../components/common/PropertyCard'; // Import our reusable card
+import PropertyCard from '../components/common/PropertyCard'; 
 
 const MessageBubble = ({ message }) => {
   const isAi = message.sender === 'ai';
@@ -28,14 +28,13 @@ const MessageBubble = ({ message }) => {
             {message.text}
           </div>
 
-          {/* DYNAMIC PROPERTY CARDS - Renders real cards inside the chat */}
           {isAi && message.properties && message.properties.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {message.properties.map((prop) => (
                 <div key={prop._id} className="w-full">
                    <PropertyCard 
                      property={prop} 
-                     isBookmarked={false} // Connect to global context if needed
+                     isBookmarked={false} 
                      onBookmarkToggle={() => {}} 
                    />
                 </div>
@@ -45,7 +44,6 @@ const MessageBubble = ({ message }) => {
         </div>
       </div>
       
-      {/* Timestamp */}
       <span className={`text-[10px] text-gray-400 mt-2 font-black uppercase tracking-widest ${isAi ? 'ml-14' : 'mr-14'}`}>
         {message.time}
       </span>
@@ -66,7 +64,6 @@ const AIChatPage = () => {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll logic
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -113,7 +110,6 @@ const AIChatPage = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] max-w-5xl mx-auto px-4">
-      {/* Chat Header */}
       <div className="flex items-center justify-between mb-8 shrink-0">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shadow-inner">
@@ -126,7 +122,6 @@ const AIChatPage = () => {
         </div>
       </div>
 
-      {/* Chat History Area */}
       <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200">
         {messages.map(msg => <MessageBubble key={msg.id} message={msg} />)}
         
@@ -139,7 +134,6 @@ const AIChatPage = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Footer Input Section */}
       <div className="pt-6 shrink-0">
         <div className="bg-white p-3 rounded-4xl shadow-2xl shadow-indigo-100 border border-gray-100">
           <div className="flex items-center gap-3">
@@ -163,7 +157,6 @@ const AIChatPage = () => {
             </button>
           </div>
           
-          {/* Quick Suggestions Chips */}
           <div className="flex gap-2 mt-3 px-2 overflow-x-auto no-scrollbar pb-1">
             {['Bole Apartments', 'CMC Villas', 'Rent under 15k'].map((tag) => (
               <button 
@@ -183,5 +176,4 @@ const AIChatPage = () => {
     </div>
   );
 };
-
 export default AIChatPage;
