@@ -4,6 +4,7 @@ import PostPropertyModal from '../components/agent/PostPropertyModal';
 import AgentPropertyCard from '../components/agent/AgentPropertyCard';
 import { Plus, Home, Building2, CheckCircle, Clock, User, Mail, Phone, MapPin } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function AgentDashboard() {
   const { user } = useAuth();
@@ -26,6 +27,13 @@ export default function AgentDashboard() {
       setLoading(false);
     }
   };
+
+  const chartData = properties.reduce((acc, curr) => {
+  const found = acc.find(item => item.name === curr.subcity);
+  if (found) found.value++;
+  else acc.push({ name: curr.subcity, value: 1 });
+  return acc;
+}, []);
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this listing?")) {
@@ -68,6 +76,8 @@ export default function AgentDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
+
+
       
       {/* 1. Profile Header Section */}
       <div className="bg-white rounded-[2.5rem] p-8 md:p-10 mb-12 shadow-xs border border-gray-100 flex flex-col md:flex-row items-center gap-8 justify-between">
@@ -98,6 +108,23 @@ export default function AgentDashboard() {
         >
           <Plus size={24} /> Post New Property
         </button>
+      </div>
+
+      <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 mb-12 shadow-xs">
+        <h3 className="text-xl font-bold text-gray-900 mb-6">Inventory by Subcity</h3>
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData}>
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 'bold'}} />
+              <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '15px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}}/>
+              <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={40}>
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#2563eb' : '#4f46e5'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* 2. Stats Section */}

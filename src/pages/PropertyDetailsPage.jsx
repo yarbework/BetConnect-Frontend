@@ -4,8 +4,24 @@ import { useAuth } from '../context/AuthContext';
 import API from '../services/api';
 import { 
   ChevronLeft, ChevronRight, MapPin, Bed, Bath, Maximize, 
-  Layers, Sparkles, Calendar, CheckCircle2, Lock, User, Phone 
+  Layers, Sparkles, Calendar, CheckCircle2, Lock, User, Phone, Navigation 
 } from 'lucide-react';
+
+// 1. IMPORT MAP COMPONENTS
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// 2. FIX FOR LEAFLET MARKER ICON (Standard Vite/Webpack issue)
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 export default function PropertyDetailsPage() {
   const { id } = useParams();
@@ -16,7 +32,7 @@ export default function PropertyDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [currentImg, setCurrentImg] = useState(0);
 
-    const backendBase = import.meta.env.PROD 
+  const backendBase = import.meta.env.PROD 
     ? import.meta.env.VITE_IMAGE_API_URL 
     : "http://localhost:5000";
 
@@ -40,6 +56,11 @@ export default function PropertyDetailsPage() {
   const nextImg = () => setCurrentImg((prev) => (prev + 1) % property.images.length);
   const prevImg = () => setCurrentImg((prev) => (prev - 1 + property.images.length) % property.images.length);
 
+  // 3. EXTRACT COORDINATES (MongoDB [lng, lat] -> Leaflet [lat, lng])
+  const position = property.location?.coordinates 
+    ? [property.location.coordinates[1], property.location.coordinates[0]] 
+    : null;
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* SECTION 1: IMAGE CAROUSEL */}
@@ -48,12 +69,10 @@ export default function PropertyDetailsPage() {
           src={property.images[currentImg]?.replace(/\\/g, '/').startsWith('http')
             ? property.images[currentImg].replace(/\\/g, '/') 
             : `${backendBase}/${property.images[currentImg]?.replace(/\\/g, '/')}`}
-
           className="w-full h-full object-cover transition-opacity duration-500"
           alt="property"
         />
         
-        {/* Carousel Nav */}
         {property.images.length > 1 && (
           <>
             <button onClick={prevImg} className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100">
@@ -70,7 +89,6 @@ export default function PropertyDetailsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* SECTION 2: DETAILS PART (Left Content) */}
         <div className="lg:col-span-2 space-y-10">
           
           {/* Header */}
@@ -153,6 +171,47 @@ export default function PropertyDetailsPage() {
                ))}
             </div>
           </div>
+
+          {/* 4. NEW INTERACTIVE MAP SECTION */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-2xl font-bold text-gray-900">Property Location</h3>
+              <div className="flex items-center gap-2 text-blue-600 text-sm font-bold bg-blue-50 px-4 py-2 rounded-xl">
+                 <Navigation size={16} /> Interactive Map
+              </div>
+            </div>
+            
+            <div className="h-100 w-full rounded-4xl overflow-hidden border border-gray-100 shadow-inner bg-gray-50 relative z-0">
+               {position ? (
+                  <MapContainer 
+                    center={position} 
+                    zoom={15} 
+                    scrollWheelZoom={false}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={position}>
+                      <Popup>
+                        <div className="font-bold text-blue-600">
+                          {property.type.toUpperCase()} - {property.price.toLocaleString()} ETB
+                        </div>
+                      </Popup>
+                    </Marker>
+                  </MapContainer>
+               ) : (
+                 <div className="h-full w-full flex flex-col items-center justify-center text-gray-400">
+                    <MapPin size={48} className="mb-2 opacity-20" />
+                    <p className="font-bold">No precise location set for this property.</p>
+                 </div>
+               )}
+            </div>
+            <p className="text-sm text-gray-400 italic">
+               * Location markers are provided by the agent. Please verify coordinates during viewing.
+            </p>
+          </div>
         </div>
 
         {/* SECTION 3: AGENT SIDEBAR (Sticky) */}
@@ -160,7 +219,6 @@ export default function PropertyDetailsPage() {
           <div className="sticky top-28 bg-white rounded-[2.5rem] border border-gray-100 shadow-xl p-8 space-y-8">
             <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">Agent Contact</h3>
             
-            {/* Agent Identity */}
             <div className="flex items-center gap-4">
                <div className="w-16 h-16 bg-[#0B3B60] rounded-full flex items-center justify-center text-white text-2xl font-black">
                  {property.agent?.name?.[0].toUpperCase() || <User />}
@@ -171,9 +229,7 @@ export default function PropertyDetailsPage() {
                </div>
             </div>
 
-            {/* SCENARIO CHECK */}
             {isAuthenticated ? (
-              /* Scenario B: Registered User - Show Phone Number */
               <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-3xl text-center space-y-4">
                 <p className="text-emerald-700 font-bold text-sm">You have full access to this agent.</p>
                 <a 
@@ -184,7 +240,6 @@ export default function PropertyDetailsPage() {
                 </a>
               </div>
             ) : (
-              /* Scenario A: Guest - Protect Information */
               <div className="space-y-6">
                 <div className="bg-gray-50 border border-dashed border-gray-200 p-8 rounded-3xl text-center flex flex-col items-center">
                    <Lock size={48} className="text-gray-300 mb-4" />
@@ -192,10 +247,8 @@ export default function PropertyDetailsPage() {
                    <p className="text-sm text-gray-400 leading-relaxed mb-6">
                      Please register or log in to view agent contact details and phone number.
                    </p>
-                   {/* Blurred mock number */}
                    <p className="text-lg font-black text-gray-200 select-none blur-[6px]">0911000000</p>
                 </div>
-                
                 <button 
                   onClick={() => navigate('/login')}
                   className="w-full py-4 bg-[#0B3B60] text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-black transition-all"
